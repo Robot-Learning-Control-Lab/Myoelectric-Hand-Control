@@ -1,4 +1,4 @@
-# Continuous Hand Movement Prediction from sEMG using a CNN in MATLAB
+# Continuous Hand Movement Prediction from sEMG using a CNN
 
 This repository contains the MATLAB implementation of a Neural Network (CNN) designed to decode continuous hand movements from muscle activity. The model learns the complex mapping from high-density surface electromyography (sEMG) signals to 2-Degree-of-Freedom (DoF) Index finger kinematics. The project is trained and evaluated on the NinaPro database (DB8).
 
