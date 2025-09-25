@@ -48,7 +48,7 @@ disp('Defining Full 2D CNN Architecture');
 inputSize = [C, T, 1];
 layers = [
     imageInputLayer(inputSize, 'Name', 'input', 'Normalization', 'none')
-    convolution2dLayer(3, 256, 'Padding', 'same', 'Name', 'conv1')
+    convolution2dLayer(3, 128, 'Padding', 'same', 'Name', 'conv1')
     batchNormalizationLayer('Name', 'bn1')
     reluLayer('Name', 'relu1')
     dropoutLayer(0.3, 'Name', 'drop1')
