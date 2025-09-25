@@ -30,7 +30,7 @@ You need to download the `dlData` folder to run and train the Network:
 
 ## How to Run
 
-1.  **Download Data:** Download the `dlData` and place it in the project's root directory. Link to `dlData`: <[dlData folder](https://drive.google.com/drive/folders/11hzMvXQ2gO-lptywPy4m13W_k0VEyGiD?usp=sharing)>
+1.  **Download Data:** Download the `dlData` folder and place it in the project's root directory. Link to `dlData`: <[dlData folder](https://drive.google.com/drive/folders/11hzMvXQ2gO-lptywPy4m13W_k0VEyGiD?usp=sharing)>
 2.  **Run Training:** Execute the script in MATLAB. The training process will begin, displaying the live loss plot and printing progress to the command window.
 
 ## Preprocessing Pipeline
