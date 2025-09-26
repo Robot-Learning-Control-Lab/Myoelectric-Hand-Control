@@ -48,28 +48,12 @@ disp('Defining Full 2D CNN Architecture');
 inputSize = [C, T, 1];
 layers = [
     imageInputLayer(inputSize, 'Name', 'input', 'Normalization', 'none')
-    convolution2dLayer(3, 128, 'Padding', 'same', 'Name', 'conv1')
-    batchNormalizationLayer('Name', 'bn1')
-    reluLayer('Name', 'relu1')
-    dropoutLayer(0.3, 'Name', 'drop1')
-    convolution2dLayer(3, 128, 'Padding', 'same', 'Name', 'conv2')
-    batchNormalizationLayer('Name', 'bn2')
-    reluLayer('Name', 'relu2')
-    dropoutLayer(0.3, 'Name', 'drop2')
-    convolution2dLayer(3, 64, 'Padding', 'same', 'Name', 'conv3')
-    batchNormalizationLayer('Name', 'bn3')
-    reluLayer('Name', 'relu3')
-    dropoutLayer(0.3, 'Name', 'drop3')
-    maxPooling2dLayer(3, 'Padding', 'same', 'Stride', 2, 'Name', 'maxpool')
-    flattenLayer('Name', 'flatten')
     fullyConnectedLayer(128, 'Name', 'fc1')
-    batchNormalizationLayer('Name', 'bn_fc1')
     reluLayer('Name', 'relu_fc1')
-    dropoutLayer(0.3, 'Name', 'drop_fc1')
-    fullyConnectedLayer(128, 'Name', 'fc2')
-    batchNormalizationLayer('Name', 'bn_fc2')
+    fullyConnectedLayer(64, 'Name', 'fc2')
     reluLayer('Name', 'relu_fc2')
-    dropoutLayer(0.3, 'Name', 'drop_fc2')
+    fullyConnectedLayer(32, 'Name', 'fc3')
+    reluLayer('Name', 'relu_fc3')
     fullyConnectedLayer(F, 'Name', 'output')
 ];
 net = dlnetwork(layerGraph(layers));
@@ -142,11 +126,10 @@ net = dlnetwork(layerGraph(layers));
 %% 3. Training loop with manual batching
 disp('Starting Training');
 % Hyperparameters
-epochs = 300; batchSize = 16; initialLearnRate = 0.001;
-decayRate = 0.9; decaySteps = 300; patience = 20;
+epochs = 200; batchSize = 16; learnRate = 0.0001;
 
 % Initialize training state
-iteration = 0; bestValLoss = inf; epochsWithoutImprovement = 0; bestNet = net; 
+iteration = 0; bestValLoss = inf; bestNet = net; 
 trailingAvg = []; trailingAvgSq = [];
 
 % Training and validation progress tracking plot
@@ -184,9 +167,6 @@ for epoch = 1:epochs
         dlX = dlarray(XTrain4D(:,:,:,batchIdx), 'SSCB');
         dlY = dlarray(YTrainMat(:,batchIdx), 'CB');
         
-        % Learning rate decay (dynamic learning rate)
-        learnRate = initialLearnRate * decayRate^(iteration / decaySteps);
-        
         % Evaluate gradients and loss 
         [grads, loss] = dlfeval(@modelGradients_seq2vec, net, dlX, dlY);
 
@@ -211,30 +191,12 @@ for epoch = 1:epochs
     valLoss = mse(dlY_pred_val, dlY_val);
     valLoss = extractdata(valLoss);
     
-    fprintf('Epoch %d | Validation Loss: %f\n', epoch, valLoss);
+    fprintf('Epoch %d | Avg Train Loss: %f, Val Loss: %f\n', epoch, avgTrainLoss, valLoss);
 
     % Update tracking live plot
     addpoints(trainLossPlot, epoch, avgTrainLoss);
     addpoints(valLossPlot, epoch, valLoss);
-    drawnow; 
-    
-    % Early stopping logic 
-    % (if the val. loss doesn't improve for "patience" epochs stop the training)
-
-    if valLoss < bestValLoss
-        bestValLoss = valLoss;
-        bestNet = net;
-
-        epochsWithoutImprovement = 0;
-    else
-        epochsWithoutImprovement = epochsWithoutImprovement + 1;
-    end
-
-    
-    if epochsWithoutImprovement >= patience
-        fprintf('Early stopping triggered after %d epochs.\n', epoch);
-        break;
-    end
+    drawnow;
 end
 
 % the final network (weights) is the network with the min Val. loss 
@@ -261,7 +223,7 @@ y_true_mat = cat(2, YTrain_vec{:})';
 
 % Scatter Plot 
 figure;
-sgtitle('2D CNN: Test Predictions vs. True Angles', 'FontSize', 14);
+sgtitle('2D CNN: Train Predictions vs. True Angles', 'FontSize', 14);
 subplot(1, 2, 1);
 scatter(y_true_mat(:,1), y_pred_mat(:,1), 'filled');
 xlabel('True Angle'); ylabel('Predicted Angle'); title('DoF 1'); grid on; refline(1,0);
